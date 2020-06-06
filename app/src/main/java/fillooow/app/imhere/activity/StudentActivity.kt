@@ -37,8 +37,8 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.GregorianCalendar
 
-private const val MONTH = 0
-private const val DAY = 1
+private const val DAY = 0
+private const val MONTH = 1
 private const val YEAR = 2
 private const val HOURS = 3
 private const val MINUTES = 4
@@ -183,7 +183,7 @@ class StudentActivity : AppCompatActivity() {
             val schedule = studentViewModel.getSchedule()
             val scheduleOnThisDay = schedule.filter {
                 isItCurrentDay(getSplitForStringDate(it.date))
-            }
+            }.sortedBy { it.date }
 
             schedule_rv.adapter = ScheduleRecyclerViewAdapter(scheduleOnThisDay)
         }

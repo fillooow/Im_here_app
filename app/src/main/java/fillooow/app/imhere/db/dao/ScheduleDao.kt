@@ -14,7 +14,7 @@ interface ScheduleDao {
 
     //изменяет анвизитед на визитед
     @Query("UPDATE schedule_table SET visit = :visited  WHERE date = :date")
-    suspend fun changeState(date: String, visited: String = VisitState.VISITED.name)
+    suspend fun changePairState(date: String, visited: String)
 
     @Insert
     suspend fun insert(pair: ScheduleEntity)

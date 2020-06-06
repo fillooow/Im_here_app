@@ -52,6 +52,14 @@
                         app:layout_constraintVertical_bias="0.729"
                         tools:text="location info" />
 
+                    <View
+                        android:id="@+id/schedule_top_divider"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#000"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/schedule_rv"
                         android:layout_width="match_parent"
@@ -60,7 +68,7 @@
                         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                         app:layout_constraintBottom_toTopOf="@id/button_container"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/schedule_top_divider"
                         app:layout_constraintVertical_bias="0.0"
                         tools:itemCount="3"
                         tools:listitem="@layout/schedule_item_view" />
@@ -145,8 +153,8 @@
                         android:layout_height="wrap_content"
                         android:background="#F8F8F8"
                         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                        app:layout_constraintTop_toBottomOf="@id/listViewInterview"
                         app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/listViewInterview"
                         tools:itemCount="3"
                         tools:listitem="@layout/interview_item_view" />
 

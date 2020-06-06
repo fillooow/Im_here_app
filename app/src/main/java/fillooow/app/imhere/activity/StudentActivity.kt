@@ -18,6 +18,8 @@ import android.widget.TabHost.TabSpec
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import fillooow.app.imhere.R
@@ -32,6 +34,7 @@ import fillooow.app.imhere.vm.StudentViewModel
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.LocationRequest
+import fillooow.app.imhere.db.entity.ScheduleEntity
 import kotlinx.android.synthetic.main.student_main.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -55,6 +58,9 @@ class StudentActivity : AppCompatActivity() {
 
     private val permissions: MutableList<String> = mutableListOf()
     private val permissionsRejected: MutableList<String> = mutableListOf()
+    private val adapter = ScheduleRecyclerViewAdapter()
+
+    private val scheduleOnThisDay = MutableLiveData<List<ScheduleEntity>>()
 
     private val locationFacade by lazy {
         studentViewModel.getLocationFacade(this)
@@ -80,6 +86,10 @@ class StudentActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(this, permissions.toTypedArray(), ALL_PERMISSIONS_RESULT)
         }
 
+        schedule_rv.adapter = adapter
+
+        scheduleOnThisDay.observe(this, Observer { adapter.updateData(it) })
+
         classCardCreate()
         tabHostCreate()
 
@@ -92,8 +102,10 @@ class StudentActivity : AppCompatActivity() {
 
             val schedule = studentViewModel.getSchedule()
             val nextPairs = schedule.filter {
-                it.date.toGregorianCalendar() > currentDate
-                        && isItCurrentDay(getSplitForStringDate(it.date))
+                isItCurrentDay(getSplitForStringDate(it.date))
+                        && it.date.toGregorianCalendar().get(Calendar.HOUR_OF_DAY) > currentDate.get(
+                    Calendar.HOUR_OF_DAY
+                ) - 2
                         && it.type != "Онлайн-курс"
             }//Оставшиеся пары на день
 
@@ -120,11 +132,23 @@ class StudentActivity : AppCompatActivity() {
                         longitude = institution.longitude
                     }
                     when (locationFacade.studentLocation!!.distanceTo(locationInst) <= 100) {
-                        true -> {
-//                            studentViewModel.changeState(currentPair.date) // fixme
+                        false -> {
+                            currentPair.visit = VisitState.VISITED.name
+                            studentViewModel.changePairState(currentPair.date, currentPair.visit) // fixme
+                            var i = 0
+                            var currentPairIndex: Int = 0
+                            scheduleOnThisDay.value?.forEachIndexed { index, scheduleEntity ->
+                                if (currentPair.date == scheduleEntity.date) {
+                                    currentPairIndex = index
+                                    return@forEachIndexed
+                                }
+                            }
+                            scheduleOnThisDay.value?.get(currentPairIndex)?.visit = VisitState.VISITED.name
+
+                            adapter.updateData(scheduleOnThisDay.value!!)
                             "Вы отметились"
                         }
-                        false -> "Вы находитесь далеко от института"
+                        true -> "Вы находитесь далеко от института"
                     }
                 }
             }
@@ -181,11 +205,21 @@ class StudentActivity : AppCompatActivity() {
         studentViewModel.viewModelScope.launch {
 
             val schedule = studentViewModel.getSchedule()
-            val scheduleOnThisDay = schedule.filter {
+            val filteredScheduleOnThisDay = schedule.filter {
                 isItCurrentDay(getSplitForStringDate(it.date))
             }.sortedBy { it.date }
 
-            schedule_rv.adapter = ScheduleRecyclerViewAdapter(scheduleOnThisDay)
+            for (pair in schedule) {
+
+                val pairStartHour = pair.date.toGregorianCalendar().get(Calendar.HOUR_OF_DAY)
+                val pairTimeMargin = currentDate.get(Calendar.HOUR_OF_DAY) - 2
+                if (pairStartHour < pairTimeMargin) {
+                    pair.visit = VisitState.UNVISITED.name
+                    studentViewModel.changePairState(pair.date, pair.visit)
+                }
+            }
+
+            scheduleOnThisDay.value = filteredScheduleOnThisDay
         }
     }
 
@@ -294,6 +328,12 @@ class StudentActivity : AppCompatActivity() {
         if (checkPlayServices().not()) {
             studentViewModel.showToast("Нужно установить Google Play Services")
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        unregisterReceiver(gpsBroadcastReceiver)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

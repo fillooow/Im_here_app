@@ -62,7 +62,7 @@ class StudentViewModel(private val app: Application) : AndroidViewModel(app) {
 
     suspend fun getSchedule(): List<ScheduleEntity> = scheduleRepository.getSchedule()
 
-    suspend fun changeState(date: String) = scheduleRepository.changeState(date)
+    suspend fun changePairState(date: String, pairState: String) = scheduleRepository.changPairState(date, pairState)
 
     fun requestLocationPermission(activity: Activity) = ActivityCompat.requestPermissions(
         activity,

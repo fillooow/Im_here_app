@@ -150,7 +150,7 @@ abstract class UrfuRoomDatabase : RoomDatabase() {
                         type = FakeDataHolder.type[index],
                         auditorium = FakeDataHolder.auditorium[index],
                         name = FakeDataHolder.name[index],
-                        visit = VisitState.UNVISITED.name
+                        visit = VisitState.NOT_STARTED_YET.name
                 )
 
                 database.scheduleDao().insert(fakeSchedule)

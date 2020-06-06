@@ -8,5 +8,5 @@ class ScheduleRepository(
 ) {
     suspend fun getSchedule(): List<ScheduleEntity> = scheduleDao.getSchedule()
 
-    suspend fun changeState(date: String) = scheduleDao.changeState(date)
+    suspend fun changPairState(date: String, pairState: String) = scheduleDao.changePairState(date, pairState)
 }

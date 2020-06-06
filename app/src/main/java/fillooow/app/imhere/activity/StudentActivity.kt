@@ -119,7 +119,7 @@ class StudentActivity : AppCompatActivity() {
 
                 currentPair == null -> "На сегодня пар больше нет"
 
-                currentPair.visit == VisitState.VISITED.name -> "Вы уже отметились"
+                currentPair.pairState == VisitState.VISITED.name -> "Вы уже отметились"
 
                 currentPair.date.toGregorianCalendar() > currentDate -> "Пара еще не началась"
 
@@ -133,8 +133,8 @@ class StudentActivity : AppCompatActivity() {
                     }
                     when (locationFacade.studentLocation!!.distanceTo(locationInst) <= 100) {
                         false -> {
-                            currentPair.visit = VisitState.VISITED.name
-                            studentViewModel.changePairState(currentPair.date, currentPair.visit) // fixme
+                            currentPair.pairState = VisitState.VISITED.name
+                            studentViewModel.changePairState(currentPair.date, currentPair.pairState) // fixme
                             var i = 0
                             var currentPairIndex: Int = 0
                             scheduleOnThisDay.value?.forEachIndexed { index, scheduleEntity ->
@@ -143,7 +143,7 @@ class StudentActivity : AppCompatActivity() {
                                     return@forEachIndexed
                                 }
                             }
-                            scheduleOnThisDay.value?.get(currentPairIndex)?.visit = VisitState.VISITED.name
+                            scheduleOnThisDay.value?.get(currentPairIndex)?.pairState = VisitState.VISITED.name
 
                             adapter.updateData(scheduleOnThisDay.value!!)
                             "Вы отметились"
@@ -214,8 +214,8 @@ class StudentActivity : AppCompatActivity() {
                 val pairStartHour = pair.date.toGregorianCalendar().get(Calendar.HOUR_OF_DAY)
                 val pairTimeMargin = currentDate.get(Calendar.HOUR_OF_DAY) - 2
                 if (pairStartHour < pairTimeMargin) {
-                    pair.visit = VisitState.UNVISITED.name
-                    studentViewModel.changePairState(pair.date, pair.visit)
+                    pair.pairState = VisitState.UNVISITED.name
+                    studentViewModel.changePairState(pair.date, pair.pairState)
                 }
             }
 

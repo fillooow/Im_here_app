@@ -52,7 +52,7 @@ class ScheduleRecyclerViewAdapter : RecyclerView.Adapter<ScheduleRecyclerViewAda
             lecturerTV.text = scheduleItem.lecturer
             pairTime.text = scheduleItem.date.mapPairTime()
             classImage.setImageResource(helpMethods.getPrefixResId(helpMethods.getPrefix(scheduleItem.name)))
-            container.setBackgroundColor(ContextCompat.getColor(container.context, mapColor(scheduleItem.visit)))
+            container.setBackgroundColor(ContextCompat.getColor(container.context, mapColor(scheduleItem.pairState)))
         }
 
         private fun String.mapPairTime() = "${split(',')[HOURS]}:${split(',')[MINUTES]}"

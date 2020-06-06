@@ -25,7 +25,7 @@ import androidx.lifecycle.viewModelScope
 import fillooow.app.imhere.R
 import fillooow.app.imhere.adapter.InterviewRecyclerViewAdapter
 import fillooow.app.imhere.adapter.ScheduleRecyclerViewAdapter
-import fillooow.app.imhere.data.VisitState
+import fillooow.app.imhere.data.PairState
 import fillooow.app.imhere.data.filter.StudentInfo
 import fillooow.app.imhere.db.entity.InterviewEntity
 import fillooow.app.imhere.utils.AUTHENTICATION_SHARED_PREFS
@@ -119,7 +119,7 @@ class StudentActivity : AppCompatActivity() {
 
                 currentPair == null -> "На сегодня пар больше нет"
 
-                currentPair.pairState == VisitState.VISITED.name -> "Вы уже отметились"
+                currentPair.pairState == PairState.VISITED.name -> "Вы уже отметились"
 
                 currentPair.date.toGregorianCalendar() > currentDate -> "Пара еще не началась"
 
@@ -133,7 +133,7 @@ class StudentActivity : AppCompatActivity() {
                     }
                     when (locationFacade.studentLocation!!.distanceTo(locationInst) <= 100) {
                         false -> {
-                            currentPair.pairState = VisitState.VISITED.name
+                            currentPair.pairState = PairState.VISITED.name
                             studentViewModel.changePairState(currentPair.date, currentPair.pairState) // fixme
                             var i = 0
                             var currentPairIndex: Int = 0
@@ -143,7 +143,7 @@ class StudentActivity : AppCompatActivity() {
                                     return@forEachIndexed
                                 }
                             }
-                            scheduleOnThisDay.value?.get(currentPairIndex)?.pairState = VisitState.VISITED.name
+                            scheduleOnThisDay.value?.get(currentPairIndex)?.pairState = PairState.VISITED.name
 
                             adapter.updateData(scheduleOnThisDay.value!!)
                             "Вы отметились"
@@ -214,7 +214,7 @@ class StudentActivity : AppCompatActivity() {
                 val pairStartHour = pair.date.toGregorianCalendar().get(Calendar.HOUR_OF_DAY)
                 val pairTimeMargin = currentDate.get(Calendar.HOUR_OF_DAY) - 2
                 if (pairStartHour < pairTimeMargin) {
-                    pair.pairState = VisitState.UNVISITED.name
+                    pair.pairState = PairState.UNVISITED.name
                     studentViewModel.changePairState(pair.date, pair.pairState)
                 }
             }

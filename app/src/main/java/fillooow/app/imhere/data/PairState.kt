@@ -1,6 +1,6 @@
 package fillooow.app.imhere.data
 
-enum class VisitState {
+enum class PairState {
     NOT_STARTED_YET,
     UNVISITED,
     VISITED

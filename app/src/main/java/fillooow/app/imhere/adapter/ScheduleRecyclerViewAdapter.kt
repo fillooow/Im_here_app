@@ -7,7 +7,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import fillooow.app.imhere.R
 import fillooow.app.imhere.data.HelpMethodsForScheduleRecycler
-import fillooow.app.imhere.data.VisitState
+import fillooow.app.imhere.data.PairState
 import fillooow.app.imhere.db.entity.ScheduleEntity
 import kotlinx.android.synthetic.main.schedule_item_view.view.*
 
@@ -59,8 +59,8 @@ class ScheduleRecyclerViewAdapter : RecyclerView.Adapter<ScheduleRecyclerViewAda
 
         private fun mapColor(pairState: String) = when (pairState) {
 
-            VisitState.UNVISITED.name -> R.color.colorRedLight
-            VisitState.VISITED.name -> R.color.colorGreenLight
+            PairState.UNVISITED.name -> R.color.colorRedLight
+            PairState.VISITED.name -> R.color.colorGreenLight
             else -> R.color.colorGrey
         }
     }

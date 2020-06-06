@@ -3,7 +3,6 @@ package fillooow.app.imhere.db.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import fillooow.app.imhere.data.VisitState
 import fillooow.app.imhere.db.entity.ScheduleEntity
 
 @Dao

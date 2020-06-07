@@ -140,6 +140,11 @@ class StudentActivity : AppCompatActivity() {
                         latitude = institution.latitude
                         longitude = institution.longitude
                     }
+                    if (locationFacade.studentLocation == null) {
+
+                        studentViewModel.showToast("Приложению не удалось вас обнаружить или геолокация выключена")
+                        return@launch
+                    }
                     when (locationFacade.studentLocation!!.distanceTo(locationInst) <= 100) {
                         false -> { // fixme: поменять местами true и false
                             currentPair.pairState = PairState.VISITED.name
@@ -303,7 +308,9 @@ class StudentActivity : AppCompatActivity() {
                             ActivityCompat.requestPermissions(
                                 this, permissionsRejected.toTypedArray(), ALL_PERMISSIONS_RESULT
                             )
-                        }.setNegativeButton("Cancel", null).create().show()
+                        }.setNegativeButton("Cancel") { _, _ ->
+                            studentViewModel.showToast("С выключенной геолокацией Вы не сможете отметиться на паре")
+                        }.create().show()
 
                         return
                     }

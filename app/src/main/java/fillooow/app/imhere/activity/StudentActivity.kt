@@ -46,6 +46,9 @@ private const val YEAR = 2
 private const val HOURS = 3
 private const val MINUTES = 4
 
+private const val MINUTES_AT_HOUR = 60
+private const val PAIR_IN_MINUTES =  90
+
 private const val ALL_PERMISSIONS_RESULT = 1011
 private const val PLAY_SERVICES_RESOLUTION_REQUEST = 1234
 
@@ -101,27 +104,33 @@ class StudentActivity : AppCompatActivity() {
         studentViewModel.viewModelScope.launch {
 
             val schedule = studentViewModel.getSchedule()
+            val currentTimeInMinutes = currentDate.toMinutesOfDay()
+
             val nextPairs = schedule.filter {
-                isItCurrentDay(getSplitForStringDate(it.date))
-                        && it.date.toGregorianCalendar().get(Calendar.HOUR_OF_DAY) > currentDate.get(
-                    Calendar.HOUR_OF_DAY
-                ) - 2
+
+                val pairMinutes = it.date.toGregorianCalendar().toMinutesOfDay()
+
+                    isItCurrentDay(getSplitForStringDate(it.date))
+                        && pairMinutes + PAIR_IN_MINUTES >= currentTimeInMinutes
                         && it.type != "Онлайн-курс"
-            }//Оставшиеся пары на день
-
-            val currentPair = when (nextPairs.isEmpty()) {
-
-                true -> null
-                false -> nextPairs.first()
             }
 
-            val toastText = when {
+            if (nextPairs.isEmpty()) {
+                studentViewModel.showToast("На сегодня пар больше нет")
+            }
 
-                currentPair == null -> "На сегодня пар больше нет"
+            val currentPair = nextPairs.firstOrNull {
+                val pairMinutes = it.date.toGregorianCalendar().toMinutesOfDay()
 
-                currentPair.pairState == PairState.VISITED.name -> "Вы уже отметились"
+                (pairMinutes <= currentTimeInMinutes) && (currentTimeInMinutes <= pairMinutes + PAIR_IN_MINUTES)
+            } ?: run {
+                studentViewModel.showToast("Пара еще не началась")
+                return@launch
+            }
 
-                currentPair.date.toGregorianCalendar() > currentDate -> "Пара еще не началась"
+            val toastText = when (currentPair.pairState) {
+
+                PairState.VISITED.name -> "Вы уже отметились"
 
                 else -> {
                     val institutionName = parseInstitutionName(currentPair.auditorium)
@@ -132,11 +141,10 @@ class StudentActivity : AppCompatActivity() {
                         longitude = institution.longitude
                     }
                     when (locationFacade.studentLocation!!.distanceTo(locationInst) <= 100) {
-                        false -> {
+                        false -> { // fixme: поменять местами true и false
                             currentPair.pairState = PairState.VISITED.name
-                            studentViewModel.changePairState(currentPair.date, currentPair.pairState) // fixme
-                            var i = 0
-                            var currentPairIndex: Int = 0
+                            studentViewModel.changePairState(currentPair.date, currentPair.pairState)
+                            var currentPairIndex = 0
                             scheduleOnThisDay.value?.forEachIndexed { index, scheduleEntity ->
                                 if (currentPair.date == scheduleEntity.date) {
                                     currentPairIndex = index
@@ -148,6 +156,7 @@ class StudentActivity : AppCompatActivity() {
                             adapter.updateData(scheduleOnThisDay.value!!)
                             "Вы отметились"
                         }
+                        // fixme: поменять местами true и false
                         true -> "Вы находитесь далеко от института"
                     }
                 }
@@ -211,9 +220,10 @@ class StudentActivity : AppCompatActivity() {
 
             for (pair in schedule) {
 
-                val pairStartHour = pair.date.toGregorianCalendar().get(Calendar.HOUR_OF_DAY)
-                val pairTimeMargin = currentDate.get(Calendar.HOUR_OF_DAY) - 2
-                if (pairStartHour < pairTimeMargin) {
+                val currentTimeInMinutes = currentDate.toMinutesOfDay()
+                val pairTimeInMinutes = pair.date.toGregorianCalendar().toMinutesOfDay()
+
+                if (pairTimeInMinutes < currentTimeInMinutes - PAIR_IN_MINUTES) {
                     pair.pairState = PairState.UNVISITED.name
                     studentViewModel.changePairState(pair.date, pair.pairState)
                 }
@@ -249,6 +259,8 @@ class StudentActivity : AppCompatActivity() {
             splittedDate[MINUTES]
         )
     }
+
+    private fun GregorianCalendar.toMinutesOfDay() = get(Calendar.HOUR_OF_DAY) * MINUTES_AT_HOUR + get(Calendar.MINUTE)
 
     private fun parseInstitutionName(auditorium: String) = auditorium.split('-').first()
 

@@ -56,7 +56,7 @@ class LocationFacade(
             .requestLocationUpdates(locationRequest, object : LocationCallback() {
                 override fun onLocationResult(result: LocationResult?) {
                     showToastCallback(
-                        "location got? longitude: ${result?.lastLocation?.latitude}, latitude: ${result?.lastLocation?.latitude}"
+                        "текущие координаты - долгота: ${result?.lastLocation?.latitude}, широта: ${result?.lastLocation?.latitude}"
                     )
                     result?.let { studentLocation = it.lastLocation }
                 }

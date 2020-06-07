@@ -303,12 +303,13 @@ class StudentActivity : AppCompatActivity() {
                     if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissionsRejected.first())) {
 
                         AlertDialog.Builder(this).setMessage(
-                            "Без этих разрешений приложение будет неработоспособным"
-                        ).setPositiveButton("OK") { _, _ ->
+                            "Без этих разрешений приложение будет неработоспособным. " +
+                                    "Вы точно уверены, что не хотите предоставить доступ к геолокации?"
+                        ).setPositiveButton("Предоставить") { _, _ ->
                             ActivityCompat.requestPermissions(
                                 this, permissionsRejected.toTypedArray(), ALL_PERMISSIONS_RESULT
                             )
-                        }.setNegativeButton("Cancel") { _, _ ->
+                        }.setNegativeButton("Запретить") { _, _ ->
                             studentViewModel.showToast("С выключенной геолокацией Вы не сможете отметиться на паре")
                         }.create().show()
 

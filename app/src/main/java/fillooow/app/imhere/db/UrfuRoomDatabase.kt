@@ -62,8 +62,8 @@ abstract class UrfuRoomDatabase : RoomDatabase() {
             "urfu_database"
         ).addCallback(AccountDatabaseCallback(scope))
             .addCallback(InstitutionDatabaseCallback(scope))
-                .addCallback(ScheduleDatabaseCallback(scope))
-                .build()
+            .addCallback(ScheduleDatabaseCallback(scope))
+            .build()
     }
 
     private class AccountDatabaseCallback(private val scope: CoroutineScope) : RoomDatabase.Callback() {

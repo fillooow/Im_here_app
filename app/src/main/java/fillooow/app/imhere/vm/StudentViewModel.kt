@@ -1,13 +1,12 @@
 package fillooow.app.imhere.vm
 
-import android.Manifest
 import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import fillooow.app.imhere.data.filter.CourseType
 import fillooow.app.imhere.data.filter.InstitutionType
 import fillooow.app.imhere.data.filter.StudentInfo
@@ -20,7 +19,6 @@ import fillooow.app.imhere.repository.InterviewRepository
 import fillooow.app.imhere.repository.LocationFacade
 import fillooow.app.imhere.repository.ScheduleRepository
 import fillooow.app.imhere.utils.STUDENT_INFO_SHARED_PREFS
-import com.google.gson.Gson
 
 class StudentViewModel(private val app: Application) : AndroidViewModel(app) {
 
@@ -63,17 +61,6 @@ class StudentViewModel(private val app: Application) : AndroidViewModel(app) {
     suspend fun getSchedule(): List<ScheduleEntity> = scheduleRepository.getSchedule()
 
     suspend fun changePairState(date: String, pairState: String) = scheduleRepository.changPairState(date, pairState)
-
-    fun requestLocationPermission(activity: Activity) = ActivityCompat.requestPermissions(
-        activity,
-        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-        1
-    )
-
-    fun checkLocationPermission() = ActivityCompat.checkSelfPermission(
-        app,
-        Manifest.permission.ACCESS_FINE_LOCATION
-    )
 
     suspend fun getInstitution(prefix: String): InstitutionEntity = institutionRepository.getCoordinates(prefix).first()
 

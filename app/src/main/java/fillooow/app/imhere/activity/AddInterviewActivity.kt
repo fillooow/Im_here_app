@@ -46,23 +46,28 @@ class AddInterviewActivity : AppCompatActivity(),
             val interviewDate = interview_date_et.textAsString
 
             when {
+                interview_author_et.textAsString.isEmpty() -> {
+                    showToast("Введите имя автора опроса")
+                    return@launch
+                }
+                interviewDate.isDateValid().not() -> {
+                    showToast("Неверный формат даты")
+                    return@launch
+                }
+                interview_date_et.isEnteredDateLessThanCurrent() -> {
+                    showToast("Дата дедлайна не может быть раньше сегодняшнего числа")
+                    return@launch
+                }
+                interview_title_et.textAsString.isEmpty() -> {
+                    showToast("Введите название опроса")
+                    return@launch
+                }
                 interviewReference.isEmpty() -> {
                     showToast("Укажите ссылку")
                     return@launch
                 }
                 interviewReference.isReferenceValid().not() -> {
                     showToast("Ссылка некорректна")
-                    return@launch
-                }
-            }
-
-            when {
-                interviewDate.isDateValid().not() -> {
-                    showToast("Неверный формат даты")
-                    return@launch
-                }
-                interview_date_et.isEnteredDateLessThanCurrent() -> {
-                    showToast("Дата не должна быть раньше текущей")
                     return@launch
                 }
             }
@@ -113,16 +118,15 @@ class AddInterviewActivity : AppCompatActivity(),
     //Проверка ссылки на форму
     private fun String.isReferenceValid(): Boolean {
 
-        val regexShort = Regex("""https://forms\.gle/.+""")
-        val regexLong = Regex("""https://docs\.google\.com/forms/d/e/.+/viewform(\?usp=sf_link)?""")
-        return ((matches(regexShort) || matches(
-            regexLong
-        ))) //&& URLUtil.isValidUrl(interviewReference)) Не пашет как надо
-            .not() //fixme: убрать,  для тестов сделано так
+        val shortGoogleFromPattern = """https://forms.gle/.+"""
+        val longGoogleFromPattern = """https://docs.google.com/forms/d/.*"""
+        val googleFormRegex = Regex("$shortGoogleFromPattern|$longGoogleFromPattern")
+        return matches(googleFormRegex)
+//            .not() //fixme: убрать,  для тестов сделано так
     }
 
-    private fun String.isDateValid() = matches(Regex("""\d\d\.\d\d\.\d\d"""))
-        .not() //fixme: убрать,  для тестов сделано так
+    private fun String.isDateValid() = matches(Regex("""\d{1,2}.\d{1,2}.20\d{2}"""))
+//        .not() //fixme: убрать,  для тестов сделано так
 
     //Получение фильтра для выбора получателей
     private fun getStudentFilter() = when (all_students_switch.isChecked) {
@@ -142,7 +146,7 @@ class AddInterviewActivity : AppCompatActivity(),
     }
 
     private fun setupInterviewDateMask() = DateMaskedTextChangedListener().installListener(interview_date_et) {
-        showToast("Дата не должна быть раньше текущей")
+        showToast("Дата дедлайна не может быть раньше сегодняшнего числа")
     }
 
     private fun showToast(text: String) = Toast.makeText(this, text, Toast.LENGTH_LONG).show()

@@ -117,6 +117,7 @@ class StudentActivity : AppCompatActivity() {
 
             if (nextPairs.isEmpty()) {
                 studentViewModel.showToast("На сегодня пар больше нет")
+                return@launch
             }
 
             val currentPair = nextPairs.firstOrNull {

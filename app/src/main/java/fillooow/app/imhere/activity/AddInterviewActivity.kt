@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import fillooow.app.imhere.R
 import fillooow.app.imhere.data.filter.CourseType
 import fillooow.app.imhere.data.filter.InstitutionType
 import fillooow.app.imhere.data.filter.StudentInfo
@@ -20,9 +21,11 @@ import fillooow.app.imhere.extensions.textAsString
 import fillooow.app.imhere.utils.AUTHENTICATION_SHARED_PREFS
 import fillooow.app.imhere.utils.DateMaskedTextChangedListener
 import fillooow.app.imhere.vm.AddInterviewViewModel
-import fillooow.app.imhere.R
 import kotlinx.android.synthetic.main.activity_add_interview.*
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+
+private const val DATE_PATTERN = "dd.MM.yyyy"
 
 class AddInterviewActivity : AppCompatActivity(),
     CompoundButton.OnCheckedChangeListener {
@@ -50,8 +53,12 @@ class AddInterviewActivity : AppCompatActivity(),
                     showToast("Введите имя автора опроса")
                     return@launch
                 }
-                interviewDate.isDateValid().not() -> {
+                interviewDate.isDateRegexValid().not() -> {
                     showToast("Неверный формат даты")
+                    return@launch
+                }
+                interviewDate.isDayOfMonthValid().not() -> {
+                    showToast("В этом месяце не может быть столько дней")
                     return@launch
                 }
                 interview_date_et.isEnteredDateLessThanCurrent() -> {
@@ -125,8 +132,18 @@ class AddInterviewActivity : AppCompatActivity(),
 //            .not() //fixme: убрать,  для тестов сделано так
     }
 
-    private fun String.isDateValid() = matches(Regex("""\d{1,2}.\d{1,2}.20\d{2}"""))
+    private fun String.isDateRegexValid() = matches(Regex("""\d{1,2}.\d{1,2}.20\d{2}"""))
 //        .not() //fixme: убрать,  для тестов сделано так
+
+    private fun String.isDayOfMonthValid(): Boolean {
+
+        val month = split(".")[1].toInt()
+
+        val dateFormat = SimpleDateFormat(DATE_PATTERN)
+        val etDate = dateFormat.parse(this)!!
+
+        return month == etDate.month + 1
+    }
 
     //Получение фильтра для выбора получателей
     private fun getStudentFilter() = when (all_students_switch.isChecked) {

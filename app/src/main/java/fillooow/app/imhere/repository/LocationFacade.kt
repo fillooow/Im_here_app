@@ -30,6 +30,9 @@ class LocationFacade(
 
 ) {
 
+    private var isConnected = false
+    private var isFailed = false
+
     var googleApiClient: GoogleApiClient? = GoogleApiClient.Builder(context)
         .addApi(LocationServices.API)
         .addConnectionCallbacks(
@@ -55,15 +58,21 @@ class LocationFacade(
         LocationServices.getFusedLocationProviderClient(context)
             .requestLocationUpdates(locationRequest, object : LocationCallback() {
                 override fun onLocationResult(result: LocationResult?) {
-                    showToastCallback(
-                        "текущие координаты - долгота: ${result?.lastLocation?.latitude}, широта: ${result?.lastLocation?.latitude}"
-                    )
-                    result?.let { studentLocation = it.lastLocation }
+                    if (isConnected.not()){
+                        showToastCallback(
+                            "текущие координаты - долгота: ${result?.lastLocation?.latitude}, широта: ${result?.lastLocation?.latitude}"
+                        )
+                    }
+                    result?.let {
+                        studentLocation = it.lastLocation
+                        isConnected = true
+                        isFailed = false
+                    }
                 }
             }, null)
 
         if (studentLocation != null) {
-            showToastCallback("longitude: ${studentLocation?.longitude}, latitude: ${studentLocation?.latitude}")
+            showToastCallback("долгота: ${studentLocation?.longitude}, широта: ${studentLocation?.latitude}")
         }
         startLocationUpdates()
     }
@@ -102,18 +111,18 @@ class LocationFacade(
             (hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                     && hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)).not()
         ) {
-            showToastCallback("You need to enable permissions to display location !") // todo: порефакторить
+            showToastCallback("Необходимо дать разрешения приложению для обнаружения геолокации") // todo: порефакторить
         }
 
         LocationServices.getFusedLocationProviderClient(context).lastLocation
             .addOnSuccessListener { location: Location? ->
                 location?.let { it: Location ->
-                    showToastCallback(
-                        "location updated? longitude: ${it.longitude}, latitude: ${it.latitude}"
-                    ) // todo: порефакторить
+//                    showToastCallback(
+//                        "location updated? longitude: ${it.longitude}, latitude: ${it.latitude}"
+//                    ) // todo: порефакторить
                     studentLocation = it
                 } ?: run {
-                    showToastCallback("location failed?") // todo: порефакторить
+//                    showToastCallback("невозможно обнаружить геопозицию устройства") // todo: порефакторить
                 }
             }
     }

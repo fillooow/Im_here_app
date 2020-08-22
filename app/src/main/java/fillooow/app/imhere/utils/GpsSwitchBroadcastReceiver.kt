@@ -12,6 +12,8 @@ class GpsSwitchBroadcastReceiver(
 
 ) : BroadcastReceiver() {
 
+    private var isConnectionFailed = false
+
     override fun onReceive(context: Context?, intent: Intent) {
         if (intent.action!!.matches(Regex("android.location.PROVIDERS_CHANGED"))) {
 
@@ -21,8 +23,18 @@ class GpsSwitchBroadcastReceiver(
 
             when (isGpsEnabled) {
 
-                true -> onGPSEnabledAction.invoke()
-                false -> onGPSDisabledAction.invoke()
+                true -> {
+
+                    onGPSEnabledAction.invoke()
+                    isConnectionFailed = false
+                }
+                false -> {
+                    
+                    if (isConnectionFailed.not()) {
+                        onGPSDisabledAction.invoke()
+                    }
+                    isConnectionFailed = true
+                }
             }
         }
     }

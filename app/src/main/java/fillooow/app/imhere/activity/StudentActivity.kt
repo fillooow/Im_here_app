@@ -22,19 +22,19 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.location.LocationRequest
 import fillooow.app.imhere.R
 import fillooow.app.imhere.adapter.InterviewRecyclerViewAdapter
 import fillooow.app.imhere.adapter.ScheduleRecyclerViewAdapter
 import fillooow.app.imhere.data.PairState
 import fillooow.app.imhere.data.filter.StudentInfo
 import fillooow.app.imhere.db.entity.InterviewEntity
+import fillooow.app.imhere.db.entity.ScheduleEntity
 import fillooow.app.imhere.utils.AUTHENTICATION_SHARED_PREFS
 import fillooow.app.imhere.utils.GpsSwitchBroadcastReceiver
 import fillooow.app.imhere.vm.StudentViewModel
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.gms.location.LocationRequest
-import fillooow.app.imhere.db.entity.ScheduleEntity
 import kotlinx.android.synthetic.main.student_main.*
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -47,7 +47,7 @@ private const val HOURS = 3
 private const val MINUTES = 4
 
 private const val MINUTES_AT_HOUR = 60
-private const val PAIR_IN_MINUTES =  90
+private const val PAIR_IN_MINUTES = 90
 
 private const val ALL_PERMISSIONS_RESULT = 1011
 private const val PLAY_SERVICES_RESOLUTION_REQUEST = 1234
@@ -110,7 +110,7 @@ class StudentActivity : AppCompatActivity() {
 
                 val pairMinutes = it.date.toGregorianCalendar().toMinutesOfDay()
 
-                    isItCurrentDay(getSplitForStringDate(it.date))
+                isItCurrentDay(getSplitForStringDate(it.date))
                         && pairMinutes + PAIR_IN_MINUTES >= currentTimeInMinutes
                         && it.type != "Онлайн-курс"
             }
@@ -229,9 +229,11 @@ class StudentActivity : AppCompatActivity() {
                 val currentTimeInMinutes = currentDate.toMinutesOfDay()
                 val pairTimeInMinutes = pair.date.toGregorianCalendar().toMinutesOfDay()
 
-                if (pairTimeInMinutes < currentTimeInMinutes - PAIR_IN_MINUTES) {
-                    pair.pairState = PairState.UNVISITED.name
-                    studentViewModel.changePairState(pair.date, pair.pairState)
+                if (pair.pairState == PairState.UNVISITED.name) {
+                    if (pairTimeInMinutes < currentTimeInMinutes - PAIR_IN_MINUTES) {
+                        pair.pairState = PairState.UNVISITED.name
+                        studentViewModel.changePairState(pair.date, pair.pairState)
+                    }
                 }
             }
 
@@ -361,8 +363,13 @@ class StudentActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
             LocationRequest.PRIORITY_HIGH_ACCURACY -> when (resultCode) {
-                Activity.RESULT_OK -> studentViewModel.showToast("onActivityResult: GPS Enabled by user")
-                Activity.RESULT_CANCELED -> studentViewModel.showToast("onActivityResult: User rejected GPS request")
+                Activity.RESULT_OK -> {
+                    locationFacade.tryToConnectGPSServices()
+                    studentViewModel.showToast("геолокация успешно включена")
+                }
+                Activity.RESULT_CANCELED -> {
+                    studentViewModel.showToast("геолокация выключена пользователем")
+                }
                 else -> {
                 }
             }

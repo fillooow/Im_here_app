@@ -26,7 +26,7 @@ class ScheduleRecyclerViewAdapter : RecyclerView.Adapter<ScheduleRecyclerViewAda
 
     override fun onBindViewHolder(holder: ScheduleViewHolder, position: Int) {
 
-        holder.bind(scheduleCache[position])
+        holder.bind(scheduleCache[position], position)
     }
 
     override fun getItemCount(): Int = scheduleCache.size
@@ -42,10 +42,10 @@ class ScheduleRecyclerViewAdapter : RecyclerView.Adapter<ScheduleRecyclerViewAda
         private val classImage = itemView.class_image
         private val container = itemView.schedule_item_container
 
-        fun bind(scheduleItem: ScheduleEntity) {
+        fun bind(scheduleItem: ScheduleEntity, position: Int) {
 
             val helpMethods = HelpMethodsForScheduleRecycler //объект с методами для помощи в заполнении ресайклера
-            classNumberTV.text = scheduleItem.number.toString()
+            classNumberTV.text = "${position + 1}"
             classNameTV.text = scheduleItem.name
             classTypeTV.text = scheduleItem.type
             auditoryTV.text = scheduleItem.auditorium
